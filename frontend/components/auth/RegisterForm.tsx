@@ -17,7 +17,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { register, saveTokens } from "@/lib/api";
+import { register } from "@/lib/api";
 import { getErrorMessage } from "@/lib/utils";
 
 const registerSchema = z
@@ -45,6 +45,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export function RegisterForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register: formRegister,
@@ -56,14 +57,17 @@ export function RegisterForm() {
 
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
+    setSuccessMessage(null);
     try {
-      const response = await register({
+      await register({
         username: values.username,
         email: values.email,
         password: values.password,
       });
-      saveTokens(response.accessToken, response.refreshToken);
-      router.push("/dashboard");
+      setSuccessMessage("Kayıt başarılı! Giriş yapabilirsiniz. Yönlendiriliyorsunuz...");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     } catch (err) {
       setServerError(getErrorMessage(err));
     }
@@ -81,6 +85,12 @@ export function RegisterForm() {
           {serverError && (
             <div className="rounded-md bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive">
               {serverError}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="rounded-md bg-green-500/10 border border-green-500/30 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+              {successMessage}
             </div>
           )}
 
