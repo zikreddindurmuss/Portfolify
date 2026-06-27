@@ -30,8 +30,10 @@ public sealed record Error(string Code, string Message)
     // --- Validation ---
     public static Error Validation(string message) =>
         new("Validation.Error", message);
+    // --- Profile ---
+    public static readonly Error ProfileNotFound =
+        new("Profile.NotFound", "Profil bulunamadı.");
 
-    // --- Generic ---
-    public static readonly Error Unexpected =
-        new("General.Unexpected", "Beklenmeyen bir hata oluştu.");
+    public static readonly Error ProfileAlreadyExists =
+        new("Profile.AlreadyExists", "Bu kullanıcının zaten bir profili var.");
 }

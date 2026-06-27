@@ -12,5 +12,6 @@ public interface IUserRepository
     Task<bool> ExistsBySlugAsync(string slug, CancellationToken ct = default);
     Task AddAsync(User user, CancellationToken ct = default);
     Task UpdateAsync(User user, CancellationToken ct = default);
+    Task DeleteAsync(User user, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
 }

@@ -38,6 +38,12 @@ public sealed class UserRepository : IUserRepository
         return Task.CompletedTask;
     }
 
+    public Task DeleteAsync(User user, CancellationToken ct = default)
+    {
+        _db.Users.Remove(user);
+        return Task.CompletedTask;
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct = default)
         => await _db.SaveChangesAsync(ct);
 }

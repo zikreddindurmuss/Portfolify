@@ -4,20 +4,20 @@ using Portfolify.Domain.Events;
 namespace Portfolify.Domain.Entities;
 
 /// <summary>
-/// Core user entity — also serves as the public profile (tenant).
-/// Slug is the unique per-tenant identifier used in public URLs: portfolify.app/{slug}
+/// Her kullanıcı kendi profilinin sahibidir.
+/// Slug, public URL'de benzersiz kimlik görevi görür: portfolify.app/{slug}
 ///
-/// Social graph extension points (Faz 2+):
-///   - Followers / Following collections
-///   - SkillEndorsements collection
-///   - Posts / Articles collection
+/// Gelecek özellikler (Faz 2+):
+///   - Followers / Following
+///   - SkillEndorsements
+///   - Posts / Articles
 /// </summary>
 public sealed class User : Entity<Guid>
 {
     public string Email { get; private set; } = string.Empty;
     public string Username { get; private set; } = string.Empty;
 
-    /// <summary>URL-safe unique identifier: portfolify.app/john-doe</summary>
+    /// <summary>Public profil URL'i: portfolify.app/john-doe</summary>
     public string Slug { get; private set; } = string.Empty;
 
     public string PasswordHash { get; private set; } = string.Empty;
