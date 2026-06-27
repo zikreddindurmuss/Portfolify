@@ -10,8 +10,10 @@ obj/
 .vs/
 
 # Local settings (secrets)
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
+appsettings.*.json
 *.local.json
 
 # EF Core migrations (isteğe bağlı — genellikle commit edilir, local override değil)
