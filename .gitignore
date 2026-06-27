@@ -1,0 +1,51 @@
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Local settings (secrets)
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+
+# EF Core migrations (isteğe bağlı — genellikle commit edilir, local override değil)
+# **/Migrations/
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# macOS
+.DS_Store
+
+# Node (frontend)
+node_modules/
+.next/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+
+# NuGet
+*.nupkg
+.nuget/
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
