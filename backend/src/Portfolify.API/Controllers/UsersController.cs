@@ -1,7 +1,7 @@
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Portfolify.Application.Features.Users.Commands.Create;
 using Portfolify.Application.Features.Users.Commands.Delete;
 using Portfolify.Application.Features.Users.Commands.Update;
 using Portfolify.Application.Features.Users.Queries.GetByEmail;
@@ -17,6 +17,21 @@ public sealed class UsersController : ControllerBase
     private readonly IMediator _mediator;
 
     public UsersController(IMediator mediator) => _mediator = mediator;
+
+    /// <summary>Giriş yapmış kullanıcının kendi bilgilerini getir (JWT'deki id üzerinden)</summary>
+    [HttpGet("me")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMe(CancellationToken ct)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var result = await _mediator.Send(new GetUserByIdQuery(userId), ct);
+        return result.IsSuccess ? Ok(result.Value) : NotFound(new { error = result.Error });
+    }
 
     /// <summary>Kullanıcıyı ID ile getir</summary>
     [HttpGet("{id:guid}")]
@@ -38,18 +53,9 @@ public sealed class UsersController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : NotFound(new { error = result.Error });
     }
 
-    /// <summary>Yeni kullanıcı oluştur</summary>
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] CreateUserCommand command, CancellationToken ct)
-    {
-        var result = await _mediator.Send(command, ct);
-        if (result.IsFailure)
-            return BadRequest(new { error = result.Error });
-
-        return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
-    }
+    // Not: Kullanıcı oluşturma yalnızca POST /api/auth/register üzerinden yapılır.
+    // CreateUserCommand + handler ileride admin paneli için Application katmanında duruyor,
+    // burada bilinçli olarak expose edilmiyor.
 
     /// <summary>Kullanıcı profilini güncelle</summary>
     [HttpPut("{id:guid}")]

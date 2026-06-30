@@ -39,4 +39,20 @@ public sealed record Error(string Code, string Message)
 
     public static readonly Error ProfileAlreadyExists =
         new("Profile.AlreadyExists", "Bu kullanıcının zaten bir profili var.");
+
+    // --- Skill ---
+    public static readonly Error SkillNotFound =
+        new("Skill.NotFound", "Skill bulunamadı.");
+
+    public static readonly Error SkillAlreadyExists =
+        new("Skill.AlreadyExists", "Bu skill zaten eklenmiş.");
+
+    public static readonly Error CannotEndorseOwnSkill =
+        new("Skill.CannotEndorseOwnSkill", "Kendi skill'ini endorse edemezsin.");
+
+    public static readonly Error EndorsementAlreadyExists =
+        new("Skill.EndorsementAlreadyExists", "Bu skill'i zaten endorse ettin.");
+
+    public static readonly Error EndorsementNotFound =
+        new("Skill.EndorsementNotFound", "Endorsement bulunamadı.");
 }

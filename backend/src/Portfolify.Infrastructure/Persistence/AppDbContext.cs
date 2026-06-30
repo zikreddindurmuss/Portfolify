@@ -10,6 +10,8 @@ public sealed class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Skill> Skills => Set<Skill>();
+    public DbSet<SkillEndorsement> SkillEndorsements => Set<SkillEndorsement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,6 +75,54 @@ public sealed class AppDbContext : DbContext
             entity.HasOne(rt => rt.User)
                   .WithMany()
                   .HasForeignKey(rt => rt.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Skill>(entity =>
+        {
+            entity.ToTable("skills");
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.Id).HasColumnName("id");
+            entity.Property(s => s.UserId).HasColumnName("user_id").IsRequired();
+            entity.Property(s => s.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
+            entity.Property(s => s.CreatedAt).HasColumnName("created_at");
+            entity.Property(s => s.UpdatedAt).HasColumnName("updated_at");
+
+            // Bir kullanıcı aynı skill'i iki kez ekleyemez
+            entity.HasIndex(s => new { s.UserId, s.Name }).IsUnique();
+
+            entity.HasOne(s => s.User)
+                  .WithMany()
+                  .HasForeignKey(s => s.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(s => s.Endorsements)
+                  .WithOne(e => e.Skill)
+                  .HasForeignKey(e => e.SkillId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Endorsements salt-okunur (IReadOnlyCollection) — EF Core'a backing field'ı açıkça bildir
+            entity.Navigation(s => s.Endorsements)
+                  .HasField("_endorsements")
+                  .UsePropertyAccessMode(PropertyAccessMode.Field);
+        });
+
+        modelBuilder.Entity<SkillEndorsement>(entity =>
+        {
+            entity.ToTable("skill_endorsements");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.SkillId).HasColumnName("skill_id").IsRequired();
+            entity.Property(e => e.EndorsedByUserId).HasColumnName("endorsed_by_user_id").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+
+            // Aynı kullanıcı aynı skill'i iki kez endorse edemez
+            entity.HasIndex(e => new { e.SkillId, e.EndorsedByUserId }).IsUnique();
+
+            entity.HasOne(e => e.EndorsedByUser)
+                  .WithMany()
+                  .HasForeignKey(e => e.EndorsedByUserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

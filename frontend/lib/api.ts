@@ -1,5 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
-import type { RegisterRequest, LoginRequest, AuthResponse } from "@/types/auth";
+import type { RegisterRequest, LoginRequest, AuthResponse, UserDto } from "@/types/auth";
+import type { MyProfile, UpdateMyProfileRequest } from "@/types/profile";
+import type { Skill } from "@/types/skill";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
@@ -110,6 +112,47 @@ export async function logout(): Promise<void> {
   const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refreshToken") : null;
   if (!refreshToken) return;
   await apiClient.post("/api/auth/logout", { refreshToken });
+}
+
+export async function getCurrentUser(): Promise<UserDto> {
+  const res = await apiClient.get<UserDto>("/api/users/me");
+  return res.data;
+}
+
+// ── Profile endpoints ────────────────────────────────────────────────────────
+
+export async function getMyProfile(): Promise<MyProfile> {
+  const res = await apiClient.get<MyProfile>("/api/profiles/me");
+  return res.data;
+}
+
+export async function updateMyProfile(data: UpdateMyProfileRequest): Promise<MyProfile> {
+  const res = await apiClient.put<MyProfile>("/api/profiles/me", data);
+  return res.data;
+}
+
+// ── Skill endpoints ──────────────────────────────────────────────────────────
+
+export async function getUserSkills(slug: string): Promise<Skill[]> {
+  const res = await apiClient.get<Skill[]>(`/api/skills/${encodeURIComponent(slug)}`);
+  return res.data;
+}
+
+export async function addSkill(name: string): Promise<Skill> {
+  const res = await apiClient.post<Skill>("/api/skills", { name });
+  return res.data;
+}
+
+export async function removeSkill(skillId: string): Promise<void> {
+  await apiClient.delete(`/api/skills/${skillId}`);
+}
+
+export async function endorseSkill(skillId: string): Promise<void> {
+  await apiClient.post(`/api/skills/${skillId}/endorse`);
+}
+
+export async function removeEndorsement(skillId: string): Promise<void> {
+  await apiClient.delete(`/api/skills/${skillId}/endorse`);
 }
 
 // ── Token helpers ───────────────────────────────────────────────────────────

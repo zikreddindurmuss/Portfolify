@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       {/* Hero */}
-      <div className="max-w-3xl text-center space-y-6">
+      <div className="max-w-3xl animate-fade-in text-center space-y-6">
         {/* Badge */}
         <span className="inline-block rounded-full border border-primary/40 bg-primary/10 px-4 py-1 text-xs font-semibold text-primary tracking-widest uppercase">
           Yazılımcılar için Dijital Kartvizit
@@ -52,7 +52,7 @@ export default function HomePage() {
         ].map((f) => (
           <div
             key={f.title}
-            className="rounded-xl border border-border bg-card p-6 space-y-3"
+            className="card-hover rounded-xl border border-border bg-card p-6 space-y-3"
           >
             <span className="text-3xl">{f.icon}</span>
             <h3 className="font-semibold text-foreground">{f.title}</h3>
