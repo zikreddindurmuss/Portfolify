@@ -9,6 +9,7 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +54,25 @@ public sealed class AppDbContext : DbContext
             entity.HasOne(p => p.User)
                   .WithMany()
                   .HasForeignKey(p => p.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("refresh_tokens");
+            entity.HasKey(rt => rt.Id);
+            entity.Property(rt => rt.Id).HasColumnName("id");
+            entity.Property(rt => rt.UserId).HasColumnName("user_id").IsRequired();
+            entity.Property(rt => rt.Token).HasColumnName("token").HasMaxLength(256).IsRequired();
+            entity.HasIndex(rt => rt.Token).IsUnique();
+            entity.Property(rt => rt.ExpiresAt).HasColumnName("expires_at").IsRequired();
+            entity.Property(rt => rt.IsRevoked).HasColumnName("is_revoked").IsRequired();
+            entity.Property(rt => rt.CreatedAt).HasColumnName("created_at");
+            entity.Property(rt => rt.UpdatedAt).HasColumnName("updated_at");
+
+            entity.HasOne(rt => rt.User)
+                  .WithMany()
+                  .HasForeignKey(rt => rt.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

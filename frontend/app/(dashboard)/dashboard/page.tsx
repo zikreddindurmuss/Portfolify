@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { clearTokens, isAuthenticated } from "@/lib/api";
+import { clearTokens, isAuthenticated, logout } from "@/lib/api";
 import type { UserDto } from "@/types/auth";
 
 export default function DashboardPage() {
@@ -21,9 +21,15 @@ export default function DashboardPage() {
     setUser({ username: "Kullanıcı", slug: "slug" });
   }, [router]);
 
-  function handleLogout() {
-    clearTokens();
-    router.replace("/login");
+  async function handleLogout() {
+    try {
+      await logout();
+    } catch {
+      // Backend'e ulaşılamasa bile lokal oturumu temizleyip çıkış yapıyoruz.
+    } finally {
+      clearTokens();
+      router.replace("/login");
+    }
   }
 
   if (!user) return null;

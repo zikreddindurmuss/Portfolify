@@ -2,33 +2,30 @@ using MediatR;
 using Portfolify.Application.Common;
 using Portfolify.Application.Common.Interfaces;
 using Portfolify.Domain.Interfaces;
+using DomainRefreshToken = Portfolify.Domain.Entities.RefreshToken;
 
 namespace Portfolify.Application.Features.Auth.Commands.Login;
 
-// TODO (Ders 3): Bu handler implement edilecek
-// Adımlar:
-//   1. Validator ile format kontrolü yap
-//   2. Email ile kullanıcı bul (_users.GetByEmailAsync)
-//   3. Kullanıcı bulunamazsa → Error.InvalidCredentials döndür
-//   4. BCrypt ile şifre doğrula (_hasher.Verify)
-//   5. Şifre yanlışsa → Error.InvalidCredentials döndür (kullanıcı bilgisi sızdırma)
-//   6. JWT access token üret (SecretKey, Issuer, Audience, ExpiresInMinutes)
-//   7. Refresh token üret (Guid.NewGuid() veya random bytes)
-//   8. Result<LoginResponse>.Success(...) döndür
 public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
     private readonly IUserRepository _users;
+    private readonly IRefreshTokenRepository _refreshTokens;
     private readonly IPasswordHasher _hasher;
+    private readonly IJwtTokenGenerator _tokenGenerator;
     private readonly LoginCommandValidator _validator;
 
     public LoginCommandHandler(
         IUserRepository users,
+        IRefreshTokenRepository refreshTokens,
         IPasswordHasher hasher,
+        IJwtTokenGenerator tokenGenerator,
         LoginCommandValidator validator)
     {
-        _users     = users;
-        _hasher    = hasher;
-        _validator = validator;
+        _users          = users;
+        _refreshTokens  = refreshTokens;
+        _hasher         = hasher;
+        _tokenGenerator = tokenGenerator;
+        _validator      = validator;
     }
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -50,7 +47,25 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, Result<L
         if (!_hasher.Verify(request.Password, user.PasswordHash))
             return Error.InvalidCredentials;
 
-        // TODO: JWT token üretimi burada yapılacak
-        throw new NotImplementedException("JWT token üretimi Ders 3'te implement edilecek.");
+        // ── 4. JWT access token + refresh token üret ───────────────────────────
+        var (accessToken, expiresAt) = _tokenGenerator.GenerateAccessToken(
+            user.Id, user.Email, user.Username, user.Slug);
+        var (refreshTokenValue, refreshTokenExpiresAt) = _tokenGenerator.GenerateRefreshToken();
+
+        // ── 5. Refresh token'ı DB'ye kaydet ─────────────────────────────────
+        var refreshToken = DomainRefreshToken.Create(user.Id, refreshTokenValue, refreshTokenExpiresAt);
+        await _refreshTokens.AddRefreshTokenAsync(refreshToken, cancellationToken);
+        await _refreshTokens.SaveChangesAsync(cancellationToken);
+
+        // ── 6. Sonucu döndür ─────────────────────────────────────────────────
+        return new LoginResponse(
+            user.Id,
+            user.Email,
+            user.Username,
+            user.Slug,
+            user.CreatedAt,
+            accessToken,
+            refreshTokenValue,
+            expiresAt);
     }
 }

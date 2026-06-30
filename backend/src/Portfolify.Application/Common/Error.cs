@@ -14,6 +14,9 @@ public sealed record Error(string Code, string Message)
     public static readonly Error Unauthorized =
         new("Auth.Unauthorized", "Bu işlem için yetkiniz yok.");
 
+    public static readonly Error InvalidRefreshToken =
+        new("Auth.InvalidRefreshToken", "Refresh token geçersiz, süresi dolmuş veya iptal edilmiş.");
+
     // --- User ---
     public static readonly Error UserNotFound =
         new("User.NotFound", "Kullanıcı bulunamadı.");

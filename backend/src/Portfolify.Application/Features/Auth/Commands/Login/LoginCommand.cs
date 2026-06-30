@@ -13,6 +13,7 @@ public sealed record LoginResponse(
     string Email,
     string Username,
     string Slug,
+    DateTime CreatedAt,
     string AccessToken,
     string RefreshToken,
     DateTime ExpiresAt
